@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>БЛИЦ — Мессенджер</title>
     
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -15,737 +14,26 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
         body { background: #ECE5DD; height: 100vh; display: flex; justify-content: center; align-items: center; }
         #app { width: 100%; max-width: 480px; height: 100vh; max-height: 800px; background: white; display: flex; flex-direction: column; box-shadow: 0 0 30px rgba(0,0,0,0.1); overflow: hidden; }
-        .header { background: #075E54; color: white; padding: 12px 16px; font-size: 18px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; min-height: 56px; }
-        .header button { background: none; border: none; color: white; font-size: 18px; cursor: pointer; padding: 4px 6px; }
-        .back-btn { font-size: 26px !important; }
+        .header { background: #075E54; color: white; padding: 16px 20px; font-size: 20px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; min-height: 60px; }
+        .header button { background: none; border: none; color: white; font-size: 22px; cursor: pointer; padding: 4px 8px; }
+        .back-btn { font-size: 28px !important; }
         .login-container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 24px; background: linear-gradient(135deg, #075E54, #128C7E); }
-        .login-card { background: white; border-radius: 24px; padding: 32px 24px; width: 100%; max-width: 360px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-        .login-card .logo { text-align: center; font-size: 48px; margin-bottom: 4px; }
-        .login-card h2 { text-align: center; color: #075E54; font-size: 26px; margin-bottom: 4px; }
-        .login-card .sub { text-align: center; color: #888; font-size: 13px; margin-bottom: 20px; }
-        .login-card input { width: 100%; padding: 12px 16px; border: 2px solid #ddd; border-radius: 16px; font-size: 15px; margin-bottom: 10px; outline: none; }
+        .login-card { background: white; border-radius: 24px; padding: 40px 32px; width: 100%; max-width: 360px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .login-card .logo { text-align: center; font-size: 52px; margin-bottom: 4px; }
+        .login-card h2 { text-align: center; color: #075E54; font-size: 28px; margin-bottom: 4px; }
+        .login-card .sub { text-align: center; color: #888; font-size: 14px; margin-bottom: 24px; }
+        .login-card input { width: 100%; padding: 14px 16px; border: 2px solid #ddd; border-radius: 16px; font-size: 16px; margin-bottom: 12px; outline: none; }
         .login-card input:focus { border-color: #25D366; }
-        .login-card button { width: 100%; padding: 14px; background: #25D366; color: white; border: none; border-radius: 16px; font-size: 17px; font-weight: bold; cursor: pointer; }
+        .login-card button { width: 100%; padding: 16px; background: #25D366; color: white; border: none; border-radius: 16px; font-size: 18px; font-weight: bold; cursor: pointer; }
         .login-card button:active { background: #1da85c; }
-        .login-card .error { color: #e74c3c; text-align: center; font-size: 13px; margin-bottom: 10px; display: none; }
-        .chat-list { flex: 1; overflow-y: auto; padding: 6px; background: #ECE5DD; }
-        .chat-item { background: white; border-radius: 12px; padding: 12px 14px; margin-bottom: 6px; display: flex; align-items: center; gap: 12px; cursor: pointer; position: relative; }
+        .login-card .error { color: #e74c3c; text-align: center; font-size: 14px; margin-bottom: 12px; display: none; }
+        .chat-list { flex: 1; overflow-y: auto; padding: 8px; background: #ECE5DD; }
+        .chat-item { background: white; border-radius: 12px; padding: 14px 16px; margin-bottom: 8px; display: flex; align-items: center; gap: 14px; cursor: pointer; }
         .chat-item:active { transform: scale(0.98); }
-        .chat-item .delete-btn { position: absolute; right: 8px; top: 8px; background: none; border: none; font-size: 16px; cursor: pointer; color: #ccc; padding: 4px; }
-        .chat-item .delete-btn:hover { color: #e74c3c; }
-        .avatar { width: 44px; height: 44px; border-radius: 50%; background: #25D366; color: white; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; flex-shrink: 0; }
+        .avatar { width: 48px; height: 48px; border-radius: 50%; background: #25D366; color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; flex-shrink: 0; }
         .chat-info { flex: 1; }
-        .chat-info .name { font-weight: bold; font-size: 15px; }
-        .chat-info .phone { font-size: 12px; color: #888; }
-        .chat-info .status { font-size: 11px; color: #25D366; }
-        .messages-container { flex: 1; overflow-y: auto; padding: 12px; background: #E5DDD5; display: flex; flex-direction: column; }
-        .message { max-width: 80%; padding: 8px 12px; border-radius: 12px; margin-bottom: 4px; word-wrap: break-word; font-size: 14px; position: relative; }
-        .message.mine { background: #DCF8C6; align-self: flex-end; border-bottom-right-radius: 4px; }
-        .message.theirs { background: white; align-self: flex-start; border-bottom-left-radius: 4px; }
-        .message .time { font-size: 9px; color: #999; margin-top: 3px; display: block; text-align: right; }
-        .message .del-msg-btn { background: none; border: none; color: #e74c3c; font-size: 11px; cursor: pointer; margin-left: 6px; opacity: 0.5; }
-        .message .del-msg-btn:hover { opacity: 1; }
-        .input-area { display: flex; padding: 8px 12px; background: white; gap: 6px; flex-shrink: 0; border-top: 1px solid #ddd; }
-        .input-area input { flex: 1; padding: 10px 14px; border: 2px solid #ddd; border-radius: 24px; font-size: 15px; outline: none; }
-        .input-area input:focus { border-color: #25D366; }
-        .input-area button { width: 46px; height: 46px; border-radius: 50%; background: #25D366; color: white; border: none; font-size: 20px; cursor: pointer; flex-shrink: 0; }
-        .input-area button:active { background: #1da85c; }
-        .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #999; padding: 30px; text-align: center; }
-        .empty-state .big { font-size: 48px; margin-bottom: 12px; }
-        .menu-btn { background: none; border: none; color: white; font-size: 22px; cursor: pointer; padding: 0 4px; }
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .modal { background: white; border-radius: 20px; padding: 24px; width: 90%; max-width: 340px; }
-        .modal h3 { margin-bottom: 16px; color: #075E54; }
-        .modal button { width: 100%; padding: 12px; margin-bottom: 8px; border: none; border-radius: 12px; font-size: 15px; cursor: pointer; }
-        .modal .danger { background: #e74c3c; color: white; }
-        .modal .danger:active { background: #c0392b; }
-        .modal .secondary { background: #ddd; color: #333; }
-        .modal .secondary:active { background: #bbb; }
-        .modal .close-btn { background: none; border: none; font-size: 22px; float: right; cursor: pointer; }
-        .badge { background: #e74c3c; color: white; border-radius: 50%; padding: 2px 8px; font-size: 11px; margin-left: 6px; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
-        .hidden { display: none !important; }
-        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 12px; font-size: 14px; z-index: 2000; animation: fadeInUp 0.3s; }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
-</head>
-<body>
-
-<div id="app"></div>
-
-<script>
-    // ==========================================
-    // 🔥 ТВОИ КЛЮЧИ FIREBASE (ВСТАВЬ СВОИ!)
-    // ==========================================
-    const firebaseConfig = {
-        apiKey: "AIzaSyBePRlZIkG9x4qBr01YKuMqR17-GpOT8tU",
-        authDomain: "blitz-chat-58958.firebaseapp.com",
-        projectId: "blitz-chat-58958",
-        storageBucket: "blitz-chat-58958.firebasestorage.app",
-        messagingSenderId: "1076631161952",
-        appId: "1:1076631161952:web:009313275aa2954b588705"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
-
-    // ==========================================
-    // 🔔 УВЕДОМЛЕНИЯ
-    // ==========================================
-    let notificationsEnabled = false;
-    let unreadCount = 0;
-
-    // Запрашиваем разрешение на уведомления
-    if ('Notification' in window && Notification.permission === 'default') {
-        Notification.requestPermission();
-    }
-
-    // Следим, свернуто ли приложение
-    document.addEventListener('visibilitychange', () => {
-        notificationsEnabled = document.hidden;
-        if (!document.hidden) {
-            unreadCount = 0;
-            updateBadge();
-        }
-    });
-
-    function showNotification(title, body) {
-        if (!('Notification' in window)) return;
-        if (Notification.permission !== 'granted') return;
-        if (!notificationsEnabled) return;
-        
-        try {
-            new Notification(title, {
-                body: body,
-                icon: '⚡',
-                silent: false,
-                vibrate: [200, 100, 200]
-            });
-        } catch(e) {}
-        unreadCount++;
-        updateBadge();
-    }
-
-    function updateBadge() {
-        const badge = document.getElementById('badge');
-        if (badge) {
-            if (unreadCount > 0) {
-                badge.textContent = unreadCount;
-                badge.style.display = 'inline';
-            } else {
-                badge.style.display = 'none';
-            }
-        }
-        // Для PWA
-        if (navigator.setAppBadge) {
-            navigator.setAppBadge(unreadCount);
-        }
-    }
-
-    // ==========================================
-    // 🍞 TOAST-УВЕДОМЛЕНИЯ
-    // ==========================================
-    function showToast(msg) {
-        const old = document.querySelector('.toast');
-        if (old) old.remove();
-        const div = document.createElement('div');
-        div.className = 'toast';
-        div.textContent = msg;
-        document.body.appendChild(div);
-        setTimeout(() => div.remove(), 3000);
-    }
-
-    // ==========================================
-    // 📦 СОСТОЯНИЕ
-    // ==========================================
-    let currentUser = null;
-    let currentUserData = null;
-    let currentPartnerId = null;
-    let currentPartnerName = '';
-    let messagesUnsubscribe = null;
-    let usersUnsubscribe = null;
-    let hiddenUsers = [];
-    const app = document.getElementById('app');
-
-    // Загружаем скрытых пользователей
-    function loadHidden() {
-        const key = `hidden_${auth.currentUser?.uid || 'guest'}`;
-        try {
-            hiddenUsers = JSON.parse(localStorage.getItem(key) || '[]');
-        } catch(e) { hiddenUsers = []; }
-        return hiddenUsers;
-    }
-
-    function saveHidden() {
-        const key = `hidden_${auth.currentUser?.uid || 'guest'}`;
-        localStorage.setItem(key, JSON.stringify(hiddenUsers));
-    }
-
-    // ==========================================
-    // 🖥️ ОТРИСОВКА
-    // ==========================================
-
-    function renderLogin(errorMsg) {
-        app.innerHTML = `
-            <div class="login-container">
-                <div class="login-card">
-                    <div class="logo">⚡</div>
-                    <h2>БЛИЦ</h2>
-                    <div class="sub">Мгновенный мессенджер для своих</div>
-                    <div class="error" id="errorMsg" style="${errorMsg ? 'display:block;' : ''}">❌ ${errorMsg || ''}</div>
-                    <input type="text" id="phoneInput" placeholder="📱 Телефон" value="+7">
-                    <input type="text" id="nameInput" placeholder="👤 Ваше имя">
-                    <button onclick="login()">🚀 Войти</button>
-                    <div style="text-align:center;margin-top:12px;font-size:11px;color:#bbb;">Без SMS, просто укажи имя</div>
-                    <div style="text-align:center;margin-top:6px;font-size:11px;color:#25D366;">Работает в России 🇷🇺</div>
-                </div>
-            </div>
-        `;
-    }
-
-    function renderChatList() {
-        hiddenUsers = loadHidden();
-        app.innerHTML = `
-            <div class="header">
-                <span>⚡ БЛИЦ <span id="badge" style="display:none;background:#e74c3c;color:#fff;border-radius:50%;padding:2px 8px;font-size:11px;">0</span></span>
-                <span style="font-size:13px;font-weight:normal;">👤 ${currentUserData?.name || ''}</span>
-                <div>
-                    <button onclick="showMenu()" title="Меню" style="font-size:20px;">⚙️</button>
-                    <button onclick="logout()" title="Выйти">🚪</button>
-                </div>
-            </div>
-            <div class="chat-list" id="chatList">
-                <div style="text-align:center;padding:30px;color:#999;">Загрузка контактов...</div>
-            </div>
-        `;
-        loadUsers();
-    }
-
-    function renderChat(partnerId, partnerName) {
-        currentPartnerId = partnerId;
-        currentPartnerName = partnerName;
-        
-        app.innerHTML = `
-            <div class="header">
-                <button class="back-btn" onclick="backToChatList()">‹</button>
-                <span style="flex:1;font-size:15px;">💬 ${partnerName}</span>
-                <span style="font-size:11px;font-weight:normal;">🟢 онлайн</span>
-                <button onclick="clearChat('${partnerId}')" title="Очистить чат" style="font-size:16px;">🗑️</button>
-            </div>
-            <div class="messages-container" id="messagesContainer">
-                <div style="text-align:center;color:#999;padding:20px;">Загрузка...</div>
-            </div>
-            <div class="input-area">
-                <input type="text" id="messageInput" placeholder="Сообщение..." 
-                       onkeydown="if(event.key==='Enter') sendMessage()">
-                <button onclick="sendMessage()">➤</button>
-            </div>
-        `;
-        
-        loadMessages(partnerId);
-        setTimeout(() => {
-            const inp = document.getElementById('messageInput');
-            if (inp) inp.focus();
-        }, 300);
-    }
-
-    function renderEmpty() {
-        app.innerHTML = `
-            <div class="header">
-                <span>⚡ БЛИЦ</span>
-                <button onclick="logout()">🚪</button>
-            </div>
-            <div class="empty-state">
-                <div class="big">📡</div>
-                <h3>Нет пользователей</h3>
-                <p>Пригласи друзей — и вы сможете общаться!</p>
-                <p style="font-size:12px;color:#ccc;margin-top:10px;">Поделись ссылкой на это приложение</p>
-            </div>
-        `;
-    }
-
-    // ==========================================
-    // 👤 ВХОД / ВЫХОД
-    // ==========================================
-
-    function login() {
-        const phone = document.getElementById('phoneInput').value.trim();
-        const name = document.getElementById('nameInput').value.trim();
-        
-        if (!phone || !name) {
-            document.getElementById('errorMsg').textContent = '❌ Введи телефон и имя!';
-            document.getElementById('errorMsg').style.display = 'block';
-            return;
-        }
-
-        const btn = document.querySelector('.login-card button');
-        btn.textContent = '⏳ Подключение...';
-        btn.disabled = true;
-
-        auth.signInAnonymously()
-            .then(result => {
-                const uid = result.user.uid;
-                return db.collection('users').doc(uid).set({
-                    name: name,
-                    phone: phone,
-                    uid: uid,
-                    status: 'В сети',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            })
-            .then(() => {
-                currentUser = auth.currentUser;
-                currentUserData = { name, phone, uid: auth.currentUser.uid };
-                renderChatList();
-                showToast('✅ Добро пожаловать, ' + name + '!');
-            })
-            .catch(err => {
-                console.error('Ошибка:', err);
-                let msg = 'Ошибка подключения. ';
-                if (err.code === 'auth/network-request-failed') {
-                    msg += 'Проверь интернет. Используй Live Server.';
-                } else {
-                    msg += err.message;
-                }
-                document.getElementById('errorMsg').textContent = '❌ ' + msg;
-                document.getElementById('errorMsg').style.display = 'block';
-                btn.textContent = '🚀 Войти';
-                btn.disabled = false;
-            });
-    }
-
-    function logout() {
-        if (messagesUnsubscribe) messagesUnsubscribe();
-        if (usersUnsubscribe) usersUnsubscribe();
-        auth.signOut().then(() => {
-            currentUser = null;
-            currentUserData = null;
-            currentPartnerId = null;
-            renderLogin();
-            showToast('👋 Выход выполнен');
-        });
-    }
-
-    // ==========================================
-    // 📋 МЕНЮ
-    // ==========================================
-
-    function showMenu() {
-        const overlay = document.createElement('div');
-        overlay.className = 'modal-overlay';
-        overlay.id = 'menuOverlay';
-        overlay.innerHTML = `
-            <div class="modal">
-                <button class="close-btn" onclick="closeMenu()">✕</button>
-                <h3>⚙️ Меню</h3>
-                <button class="danger" onclick="deleteAccount()">🗑️ Удалить аккаунт</button>
-                <button class="danger" onclick="clearAllChats()">🧹 Очистить все чаты</button>
-                <button class="secondary" onclick="exportData()">📤 Экспорт данных</button>
-                <button class="secondary" onclick="closeMenu()">Закрыть</button>
-            </div>
-        `;
-        document.body.appendChild(overlay);
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) closeMenu();
-        });
-    }
-
-    function closeMenu() {
-        const el = document.getElementById('menuOverlay');
-        if (el) el.remove();
-    }
-
-    // ==========================================
-    // 🗑️ УДАЛЕНИЕ АККАУНТА
-    // ==========================================
-
-    function deleteAccount() {
-        if (!confirm('Точно удалить свой аккаунт? Все сообщения останутся у собеседников.')) return;
-        if (!confirm('Это действие НЕОБРАТИМО! Удалить?')) return;
-        
-        const user = auth.currentUser;
-        if (!user) return;
-        const uid = user.uid;
-        
-        // Удаляем из Firestore
-        db.collection('users').doc(uid).delete()
-            .then(() => {
-                // Удаляем все сообщения пользователя (опционально)
-                // Для простоты пропускаем — сообщения останутся у собеседников
-                return user.delete();
-            })
-            .then(() => {
-                showToast('✅ Аккаунт удалён');
-                renderLogin();
-            })
-            .catch(err => {
-                if (err.code === 'auth/requires-recent-login') {
-                    alert('⚠️ Для удаления аккаунта выйди и зайди заново.');
-                } else {
-                    alert('Ошибка: ' + err.message);
-                }
-            });
-        closeMenu();
-    }
-
-    // ==========================================
-    // 🗑️ УДАЛЕНИЕ ПОЛЬЗОВАТЕЛЯ (СКРЫТЬ)
-    // ==========================================
-
-    function hideUser(uid) {
-        if (!confirm('Скрыть этого пользователя из списка?')) return;
-        hiddenUsers = loadHidden();
-        if (!hiddenUsers.includes(uid)) {
-            hiddenUsers.push(uid);
-            saveHidden();
-            renderChatList();
-            showToast('👤 Пользователь скрыт');
-        }
-    }
-
-    function unhideAll() {
-        if (!confirm('Показать всех скрытых пользователей?')) return;
-        hiddenUsers = [];
-        saveHidden();
-        renderChatList();
-        showToast('👥 Все пользователи показаны');
-    }
-
-    // ==========================================
-    // 🧹 ОЧИСТКА ЧАТА
-    // ==========================================
-
-    function clearChat(partnerId) {
-        if (!confirm('Очистить всю переписку с этим пользователем?')) return;
-        const myUid = auth.currentUser.uid;
-        const chatId = myUid < partnerId ? `${myUid}-${partnerId}` : `${partnerId}-${myUid}`;
-        
-        db.collection('chats')
-            .doc(chatId)
-            .collection('messages')
-            .get()
-            .then(snapshot => {
-                const batch = db.batch();
-                snapshot.forEach(doc => batch.delete(doc.ref));
-                return batch.commit();
-            })
-            .then(() => {
-                showToast('✅ Чат очищен');
-                // Обновляем
-                if (currentPartnerId === partnerId) {
-                    loadMessages(partnerId);
-                }
-            })
-            .catch(err => alert('Ошибка: ' + err.message));
-    }
-
-    function clearAllChats() {
-        if (!confirm('Очистить ВСЕ чаты? Это необратимо!')) return;
-        const myUid = auth.currentUser.uid;
-        
-        db.collection('chats')
-            .where('participants', 'array-contains', myUid)
-            .get()
-            .then(snapshot => {
-                const promises = [];
-                snapshot.forEach(doc => {
-                    promises.push(
-                        doc.ref.collection('messages').get()
-                            .then(msgs => {
-                                const batch = db.batch();
-                                msgs.forEach(m => batch.delete(m.ref));
-                                return batch.commit();
-                            })
-                    );
-                });
-                return Promise.all(promises);
-            })
-            .then(() => {
-                showToast('✅ Все чаты очищены');
-                if (currentPartnerId) backToChatList();
-                else renderChatList();
-            })
-            .catch(err => alert('Ошибка: ' + err.message));
-        closeMenu();
-    }
-
-    // ==========================================
-    // 📤 ЭКСПОРТ ДАННЫХ
-    // ==========================================
-
-    function exportData() {
-        const myUid = auth.currentUser.uid;
-        let allData = { user: currentUserData, chats: [] };
-        
-        db.collection('chats')
-            .where('participants', 'array-contains', myUid)
-            .get()
-            .then(snapshot => {
-                const promises = [];
-                snapshot.forEach(doc => {
-                    promises.push(
-                        doc.ref.collection('messages')
-                            .orderBy('timestamp', 'asc')
-                            .get()
-                            .then(msgs => {
-                                const messages = [];
-                                msgs.forEach(m => messages.push(m.data()));
-                                allData.chats.push({
-                                    chatId: doc.id,
-                                    participants: doc.data().participants,
-                                    messages: messages
-                                });
-                            })
-                    );
-                });
-                return Promise.all(promises);
-            })
-            .then(() => {
-                const json = JSON.stringify(allData, null, 2);
-                const blob = new Blob([json], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `blitz_export_${new Date().toISOString().slice(0,10)}.json`;
-                a.click();
-                URL.revokeObjectURL(url);
-                showToast('📤 Экспорт готов');
-            })
-            .catch(err => alert('Ошибка: ' + err.message));
-        closeMenu();
-    }
-
-    // ==========================================
-    // 💬 ЗАГРУЗКА ПОЛЬЗОВАТЕЛЕЙ
-    // ==========================================
-
-    function loadUsers() {
-        const list = document.getElementById('chatList');
-        const myUid = auth.currentUser.uid;
-        hiddenUsers = loadHidden();
-
-        if (usersUnsubscribe) usersUnsubscribe();
-
-        usersUnsubscribe = db.collection('users')
-            .where('uid', '!=', myUid)
-            .onSnapshot(snapshot => {
-                if (!snapshot || snapshot.empty) {
-                    list.innerHTML = `
-                        <div class="empty-state">
-                            <div class="big">📡</div>
-                            <h3>Нет пользователей</h3>
-                            <p>Пригласи друзей — и вы сможете общаться!</p>
-                            ${hiddenUsers.length > 0 ? `<button onclick="unhideAll()" style="margin-top:12px;padding:8px 16px;border-radius:12px;border:1px solid #25D366;background:none;color:#25D366;cursor:pointer;">👥 Показать скрытых</button>` : ''}
-                        </div>
-                    `;
-                    return;
-                }
-
-                let html = '';
-                let hasVisible = false;
-                snapshot.forEach(doc => {
-                    if (hiddenUsers.includes(doc.id)) return;
-                    hasVisible = true;
-                    const data = doc.data();
-                    const initial = (data.name || '?')[0].toUpperCase();
-                    html += `
-                        <div class="chat-item" onclick="openChat('${doc.id}', '${data.name || 'Без имени'}')">
-                            <div class="avatar">${initial}</div>
-                            <div class="chat-info">
-                                <div class="name">${data.name || 'Без имени'}</div>
-                                <div class="phone">${data.phone || ''}</div>
-                                <div class="status">🟢 ${data.status || 'В сети'}</div>
-                            </div>
-                            <button class="delete-btn" onclick="event.stopPropagation();hideUser('${doc.id}')" title="Скрыть">✕</button>
-                        </div>
-                    `;
-                });
-
-                if (!hasVisible) {
-                    list.innerHTML = `
-                        <div class="empty-state">
-                            <div class="big">👀</div>
-                            <h3>Все скрыты</h3>
-                            <button onclick="unhideAll()" style="margin-top:12px;padding:10px 20px;border-radius:12px;border:1px solid #25D366;background:none;color:#25D366;cursor:pointer;">👥 Показать всех</button>
-                        </div>
-                    `;
-                } else {
-                    list.innerHTML = html + (hiddenUsers.length > 0 ? `
-                        <div style="text-align:center;padding:8px;">
-                            <button onclick="unhideAll()" style="padding:6px 14px;border-radius:12px;border:1px solid #ccc;background:none;color:#888;cursor:pointer;font-size:12px;">👥 Показать скрытых (${hiddenUsers.length})</button>
-                        </div>
-                    ` : '');
-                }
-            }, error => {
-                list.innerHTML = `<div style="text-align:center;color:red;padding:20px;">Ошибка: ${error.message}</div>`;
-            });
-    }
-
-    // ==========================================
-    // 💬 ЗАГРУЗКА СООБЩЕНИЙ
-    // ==========================================
-
-    function loadMessages(partnerId) {
-        const container = document.getElementById('messagesContainer');
-        const myUid = auth.currentUser.uid;
-        const chatId = myUid < partnerId ? `${myUid}-${partnerId}` : `${partnerId}-${myUid}`;
-
-        if (messagesUnsubscribe) messagesUnsubscribe();
-
-        messagesUnsubscribe = db.collection('chats')
-            .doc(chatId)
-            .collection('messages')
-            .orderBy('timestamp', 'asc')
-            .onSnapshot(snapshot => {
-                if (!snapshot || snapshot.empty) {
-                    container.innerHTML = `
-                        <div style="text-align:center;color:#999;padding:30px;">
-                            <div style="font-size:40px;">💬</div>
-                            <div>Нет сообщений</div>
-                            <div style="font-size:12px;margin-top:6px;">Напиши что-нибудь!</div>
-                        </div>
-                    `;
-                    return;
-                }
-
-                let html = '';
-                snapshot.docChanges().forEach(change => {
-                    if (change.type === 'added') {
-                        const msg = change.doc.data();
-                        // 🔔 УВЕДОМЛЕНИЕ О НОВОМ СООБЩЕНИИ
-                        if (msg.senderId !== myUid && notificationsEnabled) {
-                            showNotification(
-                                `💬 Новое сообщение от ${currentPartnerName || 'собеседника'}`,
-                                msg.text || 'Сообщение'
-                            );
-                        }
-                    }
-                });
-
-                snapshot.forEach(doc => {
-                    const msg = doc.data();
-                    const isMine = msg.senderId === myUid;
-                    const time = new Date(msg.timestamp).toLocaleTimeString('ru-RU', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-                    html += `
-                        <div class="message ${isMine ? 'mine' : 'theirs'}">
-                            ${msg.text || ''}
-                            ${isMine ? `<button class="del-msg-btn" onclick="deleteMessage('${chatId}', '${doc.id}')">✕</button>` : ''}
-                            <span class="time">${time}</span>
-                        </div>
-                    `;
-                });
-                container.innerHTML = html;
-                container.scrollTop = container.scrollHeight;
-            }, error => {
-                container.innerHTML = `<div style="text-align:center;color:red;padding:20px;">Ошибка: ${error.message}</div>`;
-            });
-    }
-
-    // ==========================================
-    // 🗑️ УДАЛЕНИЕ СООБЩЕНИЯ
-    // ==========================================
-
-    function deleteMessage(chatId, messageId) {
-        if (!confirm('Удалить это сообщение у всех?')) return;
-        db.collection('chats')
-            .doc(chatId)
-            .collection('messages')
-            .doc(messageId)
-            .delete()
-            .then(() => {
-                showToast('✅ Сообщение удалено');
-            })
-            .catch(err => alert('Ошибка: ' + err.message));
-    }
-
-    // ==========================================
-    // 📤 ОТПРАВКА СООБЩЕНИЯ
-    // ==========================================
-
-    function sendMessage() {
-        const input = document.getElementById('messageInput');
-        const text = input.value.trim();
-        if (!text || !currentPartnerId) return;
-
-        const myUid = auth.currentUser.uid;
-        const chatId = myUid < currentPartnerId ? 
-            `${myUid}-${currentPartnerId}` : 
-            `${currentPartnerId}-${myUid}`;
-
-        db.collection('chats')
-            .doc(chatId)
-            .collection('messages')
-            .add({
-                text: text,
-                senderId: myUid,
-                timestamp: Date.now()
-            })
-            .then(() => {
-                db.collection('chats').doc(chatId).set({
-                    participants: [myUid, currentPartnerId],
-                    lastMessage: text,
-                    lastMessageTime: Date.now()
-                }, { merge: true });
-                input.value = '';
-                input.focus();
-            })
-            .catch(err => alert('Ошибка: ' + err.message));
-    }
-
-    // ==========================================
-    // 🔄 НАВИГАЦИЯ
-    // ==========================================
-
-    function openChat(partnerId, partnerName) {
-        renderChat(partnerId, partnerName);
-    }
-
-    function backToChatList() {
-        if (messagesUnsubscribe) messagesUnsubscribe();
-        currentPartnerId = null;
-        renderChatList();
-    }
-
-    // ==========================================
-    // 🔐 АВТОРИЗАЦИЯ
-    // ==========================================
-
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            currentUser = user;
-            db.collection('users').doc(user.uid).get()
-                .then(doc => {
-                    if (doc.exists) {
-                        currentUserData = doc.data();
-                        if (!currentPartnerId) renderChatList();
-                    } else {
-                        renderLogin();
-                    }
-                })
-                .catch(() => renderLogin());
-        } else {
-            renderLogin();
-        }
-    });
-
-    if (auth.currentUser) {
-        auth.onAuthStateChanged(() => {});
-    } else {
-        renderLogin();
-    }
-
-    console.log('⚡ БЛИЦ v2.0 запущен!');
-    console.log('🔔 Уведомления включены');
-    console.log('🗑️ Аккаунт можно удалить через меню (⚙️)');
-</script>
-
-</body>
-</html>        .chat-info .phone { font-size: 13px; color: #888; }
+        .chat-info .name { font-weight: bold; font-size: 16px; }
+        .chat-info .phone { font-size: 13px; color: #888; }
         .chat-info .status { font-size: 12px; color: #25D366; }
         .messages-container { flex: 1; overflow-y: auto; padding: 16px; background: #E5DDD5; display: flex; flex-direction: column; }
         .message { max-width: 80%; padding: 10px 14px; border-radius: 12px; margin-bottom: 6px; word-wrap: break-word; font-size: 15px; }
@@ -768,9 +56,6 @@
 <div id="app"></div>
 
 <script>
-    // ==========================================
-    // 🔥 СЮДА ВСТАВЛЯЕМ ТВОИ КЛЮЧИ!
-    // ==========================================
     const firebaseConfig = {
         apiKey: "AIzaSyBePRlZIkG9x4qBr01YKuMqR17-GpOT8tU",
         authDomain: "blitz-chat-58958.firebaseapp.com",
@@ -778,37 +63,30 @@
         storageBucket: "blitz-chat-58958.firebasestorage.app",
         messagingSenderId: "1076631161952",
         appId: "1:1076631161952:web:009313275aa2954b588705"
-        // measurementId НЕ НУЖЕН — удалили, чтобы не мешал
     };
 
-    // Инициализация Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
 
-    // ==========================================
-    // ДАЛЬШЕ — ВСЯ ЛОГИКА ПРИЛОЖЕНИЯ
-    // ==========================================
-    
     let currentUser = null;
     let currentUserData = null;
     let currentPartnerId = null;
     let messagesUnsubscribe = null;
     const app = document.getElementById('app');
 
-    function renderLogin(errorMsg) {
+    function renderLogin() {
         app.innerHTML = `
             <div class="login-container">
                 <div class="login-card">
                     <div class="logo">⚡</div>
                     <h2>БЛИЦ</h2>
                     <div class="sub">Мгновенный мессенджер для своих</div>
-                    <div class="error" id="errorMsg" style="${errorMsg ? 'display:block;' : 'display:none;'}">❌ ${errorMsg || ''}</div>
+                    <div class="error" id="errorMsg"></div>
                     <input type="text" id="phoneInput" placeholder="📱 Телефон" value="+7">
                     <input type="text" id="nameInput" placeholder="👤 Ваше имя">
                     <button onclick="login()">🚀 Войти</button>
                     <div style="text-align:center;margin-top:14px;font-size:11px;color:#bbb;">Без SMS, просто укажи имя</div>
-                    <div style="text-align:center;margin-top:8px;font-size:11px;color:#25D366;">Работает в России 🇷🇺</div>
                 </div>
             </div>
         `;
@@ -828,35 +106,88 @@
         btn.textContent = '⏳ Подключение...';
         btn.disabled = true;
 
-        auth.signInAnonymously()
-            .then(result => {
-                const uid = result.user.uid;
-                return db.collection('users').doc(uid).set({
-                    name: name,
-                    phone: phone,
-                    uid: uid,
-                    status: 'В сети',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            })
-            .then(() => {
-                currentUser = auth.currentUser;
-                currentUserData = { name, phone, uid: auth.currentUser.uid };
-                renderChatList();
+        // Ищем пользователя по телефону
+        db.collection('users')
+            .where('phone', '==', phone)
+            .get()
+            .then(snapshot => {
+                if (!snapshot.empty) {
+                    // Пользователь уже есть — используем его
+                    const doc = snapshot.docs[0];
+                    const data = doc.data();
+                    const uid = doc.id;
+                    
+                    return auth.signInAnonymously()
+                        .then(result => {
+                            const newUid = result.user.uid;
+                            if (newUid !== uid) {
+                                // Если uid разные — удаляем нового анонима и используем существующий
+                                return auth.currentUser.delete()
+                                    .then(() => {
+                                        // Удаляем старого анонима, создаём нового с нужным uid
+                                        return db.collection('users').doc(uid).set({
+                                            name: data.name,
+                                            phone: data.phone,
+                                            uid: uid,
+                                            status: 'В сети',
+                                            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                                        }, { merge: true });
+                                    })
+                                    .then(() => {
+                                        return auth.signInAnonymously();
+                                    })
+                                    .then(result => {
+                                        currentUser = result.user;
+                                        currentUserData = data;
+                                        renderChatList();
+                                        showToast('👋 С возвращением, ' + data.name + '!');
+                                    });
+                            } else {
+                                currentUser = result.user;
+                                currentUserData = data;
+                                renderChatList();
+                                showToast('👋 С возвращением, ' + data.name + '!');
+                            }
+                        });
+                } else {
+                    // Новый пользователь
+                    return auth.signInAnonymously()
+                        .then(result => {
+                            const uid = result.user.uid;
+                            return db.collection('users').doc(uid).set({
+                                name: name,
+                                phone: phone,
+                                uid: uid,
+                                status: 'В сети',
+                                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                        })
+                        .then(() => {
+                            currentUser = auth.currentUser;
+                            currentUserData = { name, phone, uid: auth.currentUser.uid };
+                            renderChatList();
+                            showToast('🎉 Добро пожаловать, ' + name + '!');
+                        });
+                }
             })
             .catch(err => {
-                console.error('Ошибка:', err);
-                let msg = 'Ошибка подключения. ';
-                if (err.code === 'auth/network-request-failed') {
-                    msg += 'Проверь интернет. Если открываешь через файл — используй Live Server.';
-                } else {
-                    msg += err.message;
-                }
+                let msg = 'Ошибка: ' + err.message;
                 document.getElementById('errorMsg').textContent = '❌ ' + msg;
                 document.getElementById('errorMsg').style.display = 'block';
                 btn.textContent = '🚀 Войти';
                 btn.disabled = false;
             });
+    }
+
+    function showToast(msg) {
+        const old = document.querySelector('.toast');
+        if (old) old.remove();
+        const div = document.createElement('div');
+        div.className = 'toast';
+        div.textContent = msg;
+        div.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:12px 24px;border-radius:12px;font-size:14px;z-index:2000;';
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 3000);
     }
 
     function logout() {
@@ -866,6 +197,7 @@
             currentUserData = null;
             currentPartnerId = null;
             renderLogin();
+            showToast('👋 Выход выполнен');
         });
     }
 
@@ -880,12 +212,16 @@
                 <div style="text-align:center;padding:40px;color:#999;">Загрузка контактов...</div>
             </div>
         `;
-        
+        loadUsers();
+    }
+
+    function loadUsers() {
+        const list = document.getElementById('chatList');
         const myUid = auth.currentUser.uid;
+
         db.collection('users')
             .where('uid', '!=', myUid)
             .onSnapshot(snapshot => {
-                const list = document.getElementById('chatList');
                 if (!snapshot || snapshot.empty) {
                     list.innerHTML = `
                         <div class="empty-state">
@@ -936,9 +272,17 @@
             </div>
         `;
         
+        loadMessages(partnerId);
+        setTimeout(() => {
+            const inp = document.getElementById('messageInput');
+            if (inp) inp.focus();
+        }, 300);
+    }
+
+    function loadMessages(partnerId) {
+        const container = document.getElementById('messagesContainer');
         const myUid = auth.currentUser.uid;
         const chatId = myUid < partnerId ? `${myUid}-${partnerId}` : `${partnerId}-${myUid}`;
-        const container = document.getElementById('messagesContainer');
 
         if (messagesUnsubscribe) messagesUnsubscribe();
 
@@ -975,17 +319,6 @@
                 container.innerHTML = html;
                 container.scrollTop = container.scrollHeight;
             });
-        
-        setTimeout(() => {
-            const inp = document.getElementById('messageInput');
-            if (inp) inp.focus();
-        }, 300);
-    }
-
-    function backToChatList() {
-        if (messagesUnsubscribe) messagesUnsubscribe();
-        currentPartnerId = null;
-        renderChatList();
     }
 
     function sendMessage() {
@@ -1015,6 +348,12 @@
                 input.value = '';
                 input.focus();
             });
+    }
+
+    function backToChatList() {
+        if (messagesUnsubscribe) messagesUnsubscribe();
+        currentPartnerId = null;
+        renderChatList();
     }
 
     auth.onAuthStateChanged(user => {
