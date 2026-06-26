@@ -49,6 +49,8 @@
         .empty-state .big { font-size: 64px; margin-bottom: 16px; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+        .badge { background: #e74c3c; color: white; border-radius: 50%; padding: 2px 8px; font-size: 11px; margin-left: 6px; }
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 12px; font-size: 14px; z-index: 2000; }
     </style>
 </head>
 <body>
@@ -56,6 +58,9 @@
 <div id="app"></div>
 
 <script>
+    // ==========================================
+    // 🔥 ТВОИ КЛЮЧИ FIREBASE
+    // ==========================================
     const firebaseConfig = {
         apiKey: "AIzaSyBePRlZIkG9x4qBr01YKuMqR17-GpOT8tU",
         authDomain: "blitz-chat-58958.firebaseapp.com",
@@ -69,20 +74,89 @@
     const db = firebase.firestore();
     const auth = firebase.auth();
 
-    let currentUser = null;
+    // ==========================================
+    // 🔔 УВЕДОМЛЕНИЯ
+    // ==========================================
+    let notificationsEnabled = false;
+    let unreadCount = 0;
+
+    // Запрашиваем разрешение на уведомления
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+    }
+
+    // Следим, свёрнуто ли приложение
+    document.addEventListener('visibilitychange', () => {
+        notificationsEnabled = document.hidden;
+        if (!document.hidden) {
+            unreadCount = 0;
+            updateBadge();
+        }
+    });
+
+    function showNotification(title, body) {
+        if (!('Notification' in window)) return;
+        if (Notification.permission !== 'granted') return;
+        if (!notificationsEnabled) return;
+        
+        try {
+            new Notification(title, {
+                body: body,
+                icon: '⚡',
+                silent: false,
+                vibrate: [200, 100, 200]
+            });
+        } catch(e) {}
+        unreadCount++;
+        updateBadge();
+    }
+
+    function updateBadge() {
+        const badge = document.getElementById('badge');
+        if (badge) {
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount;
+                badge.style.display = 'inline';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+        if (navigator.setAppBadge) {
+            navigator.setAppBadge(unreadCount);
+        }
+    }
+
+    function showToast(msg) {
+        const old = document.querySelector('.toast');
+        if (old) old.remove();
+        const div = document.createElement('div');
+        div.className = 'toast';
+        div.textContent = msg;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 3000);
+    }
+
+    // ==========================================
+    // 📦 СОСТОЯНИЕ
+    // ==========================================
     let currentUserData = null;
     let currentPartnerId = null;
+    let currentPartnerName = '';
     let messagesUnsubscribe = null;
     const app = document.getElementById('app');
 
-    function renderLogin() {
+    // ==========================================
+    // 🔐 ВХОД
+    // ==========================================
+
+    function renderLogin(errorMsg) {
         app.innerHTML = `
             <div class="login-container">
                 <div class="login-card">
                     <div class="logo">⚡</div>
                     <h2>БЛИЦ</h2>
                     <div class="sub">Мгновенный мессенджер для своих</div>
-                    <div class="error" id="errorMsg"></div>
+                    <div class="error" id="errorMsg" style="${errorMsg ? 'display:block;' : 'display:none;'}">❌ ${errorMsg || ''}</div>
                     <input type="text" id="phoneInput" placeholder="📱 Телефон" value="+7">
                     <input type="text" id="nameInput" placeholder="👤 Ваше имя">
                     <button onclick="login()">🚀 Войти</button>
@@ -106,52 +180,50 @@
         btn.textContent = '⏳ Подключение...';
         btn.disabled = true;
 
-        // Ищем пользователя по телефону
         db.collection('users')
             .where('phone', '==', phone)
             .get()
             .then(snapshot => {
                 if (!snapshot.empty) {
-                    // Пользователь уже есть — используем его
                     const doc = snapshot.docs[0];
                     const data = doc.data();
                     const uid = doc.id;
                     
-                    return auth.signInAnonymously()
+                    if (auth.currentUser && auth.currentUser.uid === uid) {
+                        currentUserData = data;
+                        renderChatList();
+                        showToast('👋 С возвращением, ' + data.name + '!');
+                        btn.textContent = '🚀 Войти';
+                        btn.disabled = false;
+                        return;
+                    }
+
+                    auth.signInAnonymously()
                         .then(result => {
                             const newUid = result.user.uid;
                             if (newUid !== uid) {
-                                // Если uid разные — удаляем нового анонима и используем существующий
-                                return auth.currentUser.delete()
-                                    .then(() => {
-                                        // Удаляем старого анонима, создаём нового с нужным uid
-                                        return db.collection('users').doc(uid).set({
-                                            name: data.name,
-                                            phone: data.phone,
-                                            uid: uid,
-                                            status: 'В сети',
-                                            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-                                        }, { merge: true });
-                                    })
-                                    .then(() => {
-                                        return auth.signInAnonymously();
-                                    })
-                                    .then(result => {
-                                        currentUser = result.user;
-                                        currentUserData = data;
-                                        renderChatList();
-                                        showToast('👋 С возвращением, ' + data.name + '!');
-                                    });
-                            } else {
-                                currentUser = result.user;
-                                currentUserData = data;
-                                renderChatList();
-                                showToast('👋 С возвращением, ' + data.name + '!');
+                                return db.collection('users').doc(newUid).set({
+                                    name: data.name,
+                                    phone: data.phone,
+                                    uid: newUid,
+                                    status: 'В сети',
+                                    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                                }, { merge: true });
                             }
+                            return Promise.resolve();
+                        })
+                        .then(() => {
+                            currentUserData = { name: data.name, phone: data.phone, uid: auth.currentUser.uid };
+                            renderChatList();
+                            showToast('👋 С возвращением, ' + data.name + '!');
+                            btn.textContent = '🚀 Войти';
+                            btn.disabled = false;
+                        })
+                        .catch(err => {
+                            showError(err, btn);
                         });
                 } else {
-                    // Новый пользователь
-                    return auth.signInAnonymously()
+                    auth.signInAnonymously()
                         .then(result => {
                             const uid = result.user.uid;
                             return db.collection('users').doc(uid).set({
@@ -163,37 +235,35 @@
                             });
                         })
                         .then(() => {
-                            currentUser = auth.currentUser;
                             currentUserData = { name, phone, uid: auth.currentUser.uid };
                             renderChatList();
                             showToast('🎉 Добро пожаловать, ' + name + '!');
+                            btn.textContent = '🚀 Войти';
+                            btn.disabled = false;
+                        })
+                        .catch(err => {
+                            showError(err, btn);
                         });
                 }
             })
             .catch(err => {
-                let msg = 'Ошибка: ' + err.message;
-                document.getElementById('errorMsg').textContent = '❌ ' + msg;
-                document.getElementById('errorMsg').style.display = 'block';
-                btn.textContent = '🚀 Войти';
-                btn.disabled = false;
+                showError(err, btn);
             });
     }
 
-    function showToast(msg) {
-        const old = document.querySelector('.toast');
-        if (old) old.remove();
-        const div = document.createElement('div');
-        div.className = 'toast';
-        div.textContent = msg;
-        div.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:12px 24px;border-radius:12px;font-size:14px;z-index:2000;';
-        document.body.appendChild(div);
-        setTimeout(() => div.remove(), 3000);
+    function showError(err, btn) {
+        console.error('Ошибка:', err);
+        document.getElementById('errorMsg').textContent = '❌ ' + err.message;
+        document.getElementById('errorMsg').style.display = 'block';
+        if (btn) {
+            btn.textContent = '🚀 Войти';
+            btn.disabled = false;
+        }
     }
 
     function logout() {
         if (messagesUnsubscribe) messagesUnsubscribe();
         auth.signOut().then(() => {
-            currentUser = null;
             currentUserData = null;
             currentPartnerId = null;
             renderLogin();
@@ -201,10 +271,14 @@
         });
     }
 
+    // ==========================================
+    // 💬 ЧАТЫ
+    // ==========================================
+
     function renderChatList() {
         app.innerHTML = `
             <div class="header">
-                <span>⚡ БЛИЦ</span>
+                <span>⚡ БЛИЦ <span id="badge" style="display:none;background:#e74c3c;color:#fff;border-radius:50%;padding:2px 8px;font-size:11px;">0</span></span>
                 <span style="font-size:14px;font-weight:normal;">👤 ${currentUserData?.name || ''}</span>
                 <button onclick="logout()" title="Выйти">🚪</button>
             </div>
@@ -217,7 +291,9 @@
 
     function loadUsers() {
         const list = document.getElementById('chatList');
-        const myUid = auth.currentUser.uid;
+        if (!list) return;
+        const myUid = auth.currentUser?.uid;
+        if (!myUid) return;
 
         db.collection('users')
             .where('uid', '!=', myUid)
@@ -281,7 +357,10 @@
 
     function loadMessages(partnerId) {
         const container = document.getElementById('messagesContainer');
-        const myUid = auth.currentUser.uid;
+        if (!container) return;
+        const myUid = auth.currentUser?.uid;
+        if (!myUid) return;
+        
         const chatId = myUid < partnerId ? `${myUid}-${partnerId}` : `${partnerId}-${myUid}`;
 
         if (messagesUnsubscribe) messagesUnsubscribe();
@@ -301,6 +380,21 @@
                     `;
                     return;
                 }
+
+                // 🔔 ПРОВЕРЯЕМ НОВЫЕ СООБЩЕНИЯ ДЛЯ УВЕДОМЛЕНИЙ
+                snapshot.docChanges().forEach(change => {
+                    if (change.type === 'added') {
+                        const msg = change.doc.data();
+                        // Если сообщение НЕ моё И приложение свёрнуто
+                        if (msg.senderId !== myUid && document.hidden) {
+                            showNotification(
+                                `💬 Новое сообщение от ${currentPartnerName || 'собеседника'}`,
+                                msg.text || 'Сообщение'
+                            );
+                        }
+                    }
+                });
+
                 let html = '';
                 snapshot.forEach(doc => {
                     const msg = doc.data();
@@ -326,7 +420,9 @@
         const text = input.value.trim();
         if (!text || !currentPartnerId) return;
 
-        const myUid = auth.currentUser.uid;
+        const myUid = auth.currentUser?.uid;
+        if (!myUid) return;
+
         const chatId = myUid < currentPartnerId ? 
             `${myUid}-${currentPartnerId}` : 
             `${currentPartnerId}-${myUid}`;
@@ -356,9 +452,12 @@
         renderChatList();
     }
 
+    // ==========================================
+    // 🔐 АВТОРИЗАЦИЯ
+    // ==========================================
+
     auth.onAuthStateChanged(user => {
         if (user) {
-            currentUser = user;
             db.collection('users').doc(user.uid).get()
                 .then(doc => {
                     if (doc.exists) {
@@ -379,6 +478,8 @@
     } else {
         renderLogin();
     }
+
+    console.log('⚡ БЛИЦ с уведомлениями запущен!');
 </script>
 
 </body>
